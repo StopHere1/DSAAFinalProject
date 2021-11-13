@@ -24,13 +24,13 @@ public class CollisionSystem {
 
         // updates priority queue with all new events for particle a
         private void predict(Particle a, double limit) {
-            if (a == null) return;
+            if (a == null) return;  //if particle is empty return
 
             // particle-particle collisions
-            for (int i = 0; i < particles.length; i++) {
+            for (int i = 0; i < particles.length; i++) { //calculate the time to hit each particle
                 double dt = a.timeToHit(particles[i]);
-                if (t + dt <= limit)
-                    pq.insert(new Event(t + dt, a, particles[i]));
+                if (t + dt <= limit) // if the collision happens in the time-limit
+                    pq.insert(new Event(t + dt, a, particles[i]));   // add the collision to the event priority queue
             }
 
             // particle-wall collisions
@@ -42,14 +42,14 @@ public class CollisionSystem {
 
         // redraw all particles
         private void redraw(double limit) {
-            StdDraw.clear();
+            StdDraw.clear();      // clear the canvas
             for (int i = 0; i < particles.length; i++) {
-                particles[i].draw();
+                particles[i].draw();   //draw the particles
             }
             StdDraw.show();
             StdDraw.pause(20);
             if (t < limit) {
-                pq.insert(new Event(t + 1.0 / HZ, null, null));
+                pq.insert(new Event(t + 1.0 / HZ, null, null));  //redraw event
             }
         }
 
@@ -80,8 +80,10 @@ public class CollisionSystem {
 
                 // physical collision, so update positions, and then simulation clock
                 for (int i = 0; i < particles.length; i++)
-                    particles[i].move(e.time - t);
-                t = e.time;
+                    particles[i].move(e.time - t);         //enable particles to move to the next time when collision take place.
+                t = e.time; // set t as the time when the last event take place
+
+
 
                 // process event
                 if      (a != null && b != null) a.bounceOff(b);              // particle-particle collision
