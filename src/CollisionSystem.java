@@ -1,16 +1,31 @@
 //package edu.princeton.cs.algs4;
 
-import edu.princeton.cs.algs4.*;
-import edu.princeton.cs.algs4.Particle;
+//import edu.princeton.cs.algs4.*;
+//import edu.princeton.cs.algs4.Particle;
+
+import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdIn;
 
 import java.awt.Color;
+import java.util.ArrayList;
+
+import static edu.princeton.cs.algs4.StdOut.printf;
+import static edu.princeton.cs.algs4.StdOut.println;
+
 
 public class CollisionSystem {
-        private static final double HZ = 0.5;    // number of redraw events per clock tick
-
+        private static final double HZ = 1;    // number of redraw events per clock tick
+        private static final double dt = 1/HZ;
         private MinPQ<Event> pq;          // the priority queue
         private double t  = 0.0;          // simulation clock time
         private Particle[] particles;     // the array of particles
+        private static int axisSize = 1 ;
+        private static boolean terminal = true;
+        private static int[] time =null;
+        private static int[] index =null;
+
+
 
         /**
          * Initializes a system with the specified collection of particles.
@@ -44,11 +59,16 @@ public class CollisionSystem {
         private void redraw(double limit) {
             StdDraw.clear();      // clear the canvas
             for (int i = 0; i < particles.length; i++) {
+//                UniversalGravitation.getGravitation(particles[i],particles,1.0 / HZ);
+//                predict(particles[i],limit);
+//                particles[i].move(1.0 / HZ);
                 particles[i].draw();   //draw the particles
+
             }
             StdDraw.show();
             StdDraw.pause(20);
             if (t < limit) {
+
                 pq.insert(new Event(t + 1.0 / HZ, null, null));  //redraw event
             }
         }
@@ -68,6 +88,8 @@ public class CollisionSystem {
             }
             pq.insert(new Event(0, null, null));        // redraw event
 
+            int count= 0;
+
 
             // the main event-driven simulation loop
             while (!pq.isEmpty()) {
@@ -78,9 +100,29 @@ public class CollisionSystem {
                 Particle a = e.a;
                 Particle b = e.b;
 
+//                for(Particle current :particles){
+//                    UniversalGravitation.getGravitation(current,particles,limit);
+//                }
+
+
                 // physical collision, so update positions, and then simulation clock
-                for (int i = 0; i < particles.length; i++)
-                    particles[i].move(e.time - t);         //enable particles to move to the next time when collision take place.
+                for (int i = 0; i < particles.length; i++) {
+                    double individualTime = t;
+//                  UniversalGravitation.getGravitation(particles[i], particles, e.time);
+                    while(individualTime+dt<=e.time) {
+//                        UniversalGravitation.getGravitation(particles[i],particles,dt);
+//                        predict(particles[i],limit);
+                        if(individualTime==time[count]){
+                            printf("%e %e %e %e\n",particles[i].getRx(),particles[i].getRy(),particles[i].getVx(),particles[i].getVy());
+
+                        }
+                        particles[i].move(dt);
+                        individualTime = individualTime + dt;
+
+                    }
+//                    UniversalGravitation.getGravitation(particles[i],particles,e.time - individualTime);
+//                    particles[i].move(e.time - individualTime);
+                }    //enable particles to move to the next time when collision take place.
                 t = e.time; // set t as the time when the last event take place
 
 
@@ -89,7 +131,9 @@ public class CollisionSystem {
                 if      (a != null && b != null) a.bounceOff(b);              // particle-particle collision
                 else if (a != null && b == null) a.bounceOffVerticalWall();   // particle-wall collision
                 else if (a == null && b != null) b.bounceOffHorizontalWall(); // particle-wall collision
-                else if (a == null && b == null) redraw(limit);               // redraw event
+                else if (a == null && b == null) {
+                    redraw(limit);               // redraw event
+                }
 
                 // update the priority queue with new collisions involving a or b
                 predict(a, limit);
@@ -149,9 +193,18 @@ public class CollisionSystem {
          *
          * @param args the command-line arguments
          */
+
+
         public static void main(String[] args) {
 
             StdDraw.setCanvasSize(600, 600);
+
+            //test axis
+//            StdDraw.setPenColor(StdDraw.RED);
+//            StdDraw.setPenRadius(0.1);
+//            StdDraw.point(0.5,0.5);
+
+
 
             // enable double buffering
             StdDraw.enableDoubleBuffering();
@@ -169,7 +222,15 @@ public class CollisionSystem {
 
             // or read from standard input
             else {
+                String output = StdIn.readString();
+                if(output.equals("terminal")){
+                    terminal=true;
+                }else{
+                    terminal=false;
+                }
                 int n = StdIn.readInt();
+                axisSize = n;
+                n = StdIn.readInt();
                 particles = new Particle[n];
                 for (int i = 0; i < n; i++) {
                     double rx     = StdIn.readDouble();
@@ -184,10 +245,24 @@ public class CollisionSystem {
                     Color color   = new Color(r, g, b);
                     particles[i] = new Particle(rx, ry, vx, vy, radius, mass, color);
                 }
+                n = StdIn.readInt();
+                time = new int[n];
+                index= new int[n];
+                for(int i = 0; i < n ;i++){
+                    int ti = StdIn.readInt();
+                    int in= StdIn.readInt();
+                    time[i]= ti;
+                    index[i]=in;
+                }
+
             }
 
             // create collision system and simulate
             CollisionSystem system = new CollisionSystem(particles);
             system.simulate(10000);
         }
+
+    public static int getAxisSize() {
+        return axisSize;
+    }
 }
