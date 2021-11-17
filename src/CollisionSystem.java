@@ -113,8 +113,8 @@ public class CollisionSystem {
 //                        UniversalGravitation.getGravitation(particles[i],particles,dt);
 //                        predict(particles[i],limit);
                         if(individualTime==time[count]){
-                            printf("%e %e %e %e\n",particles[i].getRx(),particles[i].getRy(),particles[i].getVx(),particles[i].getVy());
-
+                            printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
+                            count++;
                         }
                         particles[i].move(dt);
                         individualTime = individualTime + dt;
