@@ -5,9 +5,9 @@ import java.math.*;
 public class UniversalGravitation {
     private static final double G = 6.67 * Math.pow(10,-11);
 
-//   public double getG() {
-//        return G;
-//    }
+   public double getG() {
+        return G;
+    }
 
     public static void getGravitation(Particle a, Particle[] allParticles,double dt){
         double xAcceleration = 0;

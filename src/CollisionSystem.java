@@ -112,7 +112,7 @@ public class CollisionSystem {
                     while(individualTime+dt<=e.time) {
 //                        UniversalGravitation.getGravitation(particles[i],particles,dt);
 //                        predict(particles[i],limit);
-                        if(individualTime==time[count]){
+                        if(count<=time.length-1 && individualTime==time[count]){
                             printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
                             count++;
                         }
