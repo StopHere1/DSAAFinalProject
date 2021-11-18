@@ -34,11 +34,12 @@ public class Particle {
 
     private double rx, ry;        // position
     private double vx, vy;        // velocity
+    private double fx, fy;       // force
     private int count;            // number of collisions so far
     private final double radius;  // radius
     private final double mass;    // mass
     private final Color color;    // color
-
+    private static final double G = 6.67e-11;
 
     /**
      * Initializes a particle with the specified position, velocity, radius, mass, and color.
@@ -56,11 +57,18 @@ public class Particle {
         this.vy = vy;
         this.rx = rx;
         this.ry = ry;
+
         this.radius = radius;
         this.mass   = mass;
         this.color  = color;
     }
 
+    public void update(double dt) {
+        vx += dt * fx / mass;
+        vy += dt * fy / mass;
+        rx += dt * vx;
+        ry += dt * vy;
+    }
     /**
      * Initializes a particle with a random position and velocity.
      * The position is uniform in the unit box; the velocity in
@@ -76,6 +84,47 @@ public class Particle {
         color  = Color.BLACK;
     }
 
+    public double distanceTo(Particle b) {
+        double dx = rx - b.rx;
+        double dy = ry - b.ry;
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    public void addForce(Particle b) {
+        Particle a = this;
+        double EPS = 3E4;      // softening parameter
+        double dx = b.rx - a.rx;
+        double dy = b.ry - a.ry;
+        double dist = Math.sqrt(dx*dx + dy*dy);
+        double F = (G * a.mass * b.mass) / (dist*dist + EPS*EPS);
+        a.fx += F * dx / dist;
+        a.fy += F * dy / dist;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%10.3E %10.3E %10.3E %10.3E %10.3E", rx, ry, vx, vy, mass);
+    }
+
+
+    public boolean in(Quad q) {
+        return q.contains(this.rx, this.ry);
+    }
+
+    public Particle plus(Particle b) {
+        Particle a = this;
+
+        double m = a.mass + b.mass;
+        double x = (a.rx * a.mass + b.rx * b.mass) / m;
+        double y = (a.ry * a.mass + b.ry * b.mass) / m;
+
+        return new Particle(x, y, a.vx, b.vx,a.radius, m, a.color);    //Notice the radius;
+    }
+
+    public void resetForce() {
+        fx = 0.0;
+        fy = 0.0;
+    }
     /**
      * Moves this particle in a straight line (based on its velocity)
      * for the specified amount of time.

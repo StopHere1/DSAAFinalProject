@@ -1,4 +1,6 @@
-/** 
+import edu.princeton.cs.algs4.StdDraw;
+
+/**
  * Quad.java
  *
  * Represents quadrants for the Barnes-Hut algorithm. 

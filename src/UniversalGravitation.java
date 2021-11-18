@@ -1,5 +1,4 @@
 import edu.princeton.cs.algs4.*;
-//import edu.princeton.cs.algs4.Particle;
 
 import java.math.*;
 public class UniversalGravitation {

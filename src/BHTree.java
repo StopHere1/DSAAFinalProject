@@ -16,7 +16,7 @@ public class BHTree {
     // threshold value
     private final double Theta = 0.5;
 
-    private Body body;     // body or aggregate body stored in this node
+    private Particle particle;     // body or aggregate body stored in this node
     private Quad quad;     // square region that the tree represents
     private BHTree NW;     // tree representing northwest quadrant
     private BHTree NE;     // tree representing northeast quadrant
@@ -32,7 +32,7 @@ public class BHTree {
      */
     public BHTree(Quad q) {
         this.quad = q;
-        this.body = null;
+        this.particle = null;
         this.NW = null;
         this.NE = null;
         this.SW = null;
@@ -43,18 +43,18 @@ public class BHTree {
     /**
      * Adds the Body b to the invoking Barnes-Hut tree.
      */
-    public void insert(Body b) {
+    public void insert(Particle b) {
 
         // if this node does not contain a body, put the new body b here
-        if (body == null) {
-            body = b;
+        if (particle == null) {
+            particle = b;
             return;
         }
   
         // internal node
         if (! isExternal()) {
             // update the center-of-mass and total mass
-            body = body.plus(b);
+            particle = particle.plus(b);
         
             // recursively insert Body b into the appropriate quadrant
             putBody(b);
@@ -69,11 +69,11 @@ public class BHTree {
             SW = new BHTree(quad.SW());
 
             // recursively insert both this body and Body b into the appropriate quadrant
-            putBody(this.body);
+            putBody(this.particle);
             putBody(b);
 
             // update the center-of-mass and total mass
-            body = body.plus(b);
+            particle = particle.plus(b);
         }
     }
 
@@ -81,7 +81,7 @@ public class BHTree {
     /**
      * Inserts a body into the appropriate quadrant.
      */ 
-    private void putBody(Body b) {
+    private void putBody(Particle b) {
         if (b.in(quad.NW()))
             NW.insert(b);
         else if (b.in(quad.NE()))
@@ -106,14 +106,14 @@ public class BHTree {
      * Approximates the net force acting on Body b from all bodies
      * in the invoking Barnes-Hut tree, and updates b's force accordingly.
      */
-    public void updateForce(Body b) {
+    public void updateForce(Particle b) {
     
-        if (body == null || b.equals(body))
+        if (particle == null || b.equals(particle))
             return;
 
         // if the current node is external, update net force acting on b
         if (isExternal()) 
-            b.addForce(body);
+            b.addForce(particle);
  
         // for internal nodes
         else {
@@ -122,11 +122,11 @@ public class BHTree {
             double s = quad.length();
 
             // distance between Body b and this node's center-of-mass
-            double d = body.distanceTo(b);
+            double d = particle.distanceTo(b);
 
             // compare ratio (s / d) to threshold value Theta
             if ((s / d) < Theta)
-                b.addForce(body);   // b is far away
+                b.addForce(particle);   // b is far away
             
             // recurse on each of current node's children
             else {
@@ -148,8 +148,8 @@ public class BHTree {
      */
     public String toString() {
         if (isExternal()) 
-            return " " + body + "\n";
+            return " " + particle + "\n";
         else
-            return "*" + body + "\n" + NW + NE + SW + SE;
+            return "*" + particle + "\n" + NW + NE + SW + SE;
     }
 }
