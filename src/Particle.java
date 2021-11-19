@@ -15,6 +15,9 @@ import edu.princeton.cs.algs4.StdRandom;
 
 import java.awt.*;
 
+import static edu.princeton.cs.algs4.StdOut.printf;
+import static jdk.nashorn.internal.objects.Global.println;
+
 /**
  *  The {@code Particle} class represents a particle moving in the unit box,
  *  with a given position, velocity, radius, and mass. Methods are provided
@@ -64,16 +67,21 @@ public class Particle {
     }
 
     public void update(double dt) {
+//        printf(String.valueOf(vx)+"before");
         vx += dt * fx / mass;
+//        printf(String.valueOf(vx)+"after");
         vy += dt * fy / mass;
         rx += dt * vx;
         ry += dt * vy;
+//        printf("updated");
     }
+
     /**
      * Initializes a particle with a random position and velocity.
      * The position is uniform in the unit box; the velocity in
      * either direciton is chosen uniformly at random.
      */
+
     public Particle() {
         rx     = StdRandom.uniform(0.0, 1.0);
         ry     = StdRandom.uniform(0.0, 1.0);
@@ -92,16 +100,16 @@ public class Particle {
 
     public void addForce(Particle b) {
         Particle a = this;
-        double EPS = 3E4;      // softening parameter
+//        double EPS = 3E4;      // softening parameter
         double dx = b.rx - a.rx;
         double dy = b.ry - a.ry;
         double dist = Math.sqrt(dx*dx + dy*dy);
-        double F = (G * a.mass * b.mass) / (dist*dist + EPS*EPS);
+        double F = (G * a.mass * b.mass) / (dist*dist ); //+ EPS*EPS
         a.fx += F * dx / dist;
         a.fy += F * dy / dist;
+//        printf(String.valueOf(a.fx)+" ");
     }
 
-    @Override
     public String toString() {
         return String.format("%10.3E %10.3E %10.3E %10.3E %10.3E", rx, ry, vx, vy, mass);
     }
@@ -196,8 +204,8 @@ public class Particle {
      *         with a vertical wall
      */
     public double timeToHitVerticalWall() {
-        if      (vx > 0) return (1.0 - rx - radius) / vx;
-        else if (vx < 0) return (radius - rx) / vx;
+        if      (vx > 0) return (CollisionSystem.getAxisSize()  - rx - radius) / vx;
+        else if (vx < 0) return (-CollisionSystem.getAxisSize() + radius - rx) / vx;
         else             return INFINITY;
     }
 
@@ -211,8 +219,8 @@ public class Particle {
      *         with a horizontal wall
      */
     public double timeToHitHorizontalWall() {
-        if      (vy > 0) return (1.0 - ry - radius) / vy;
-        else if (vy < 0) return (radius - ry) / vy;
+        if      (vy > 0) return (CollisionSystem.getAxisSize()  - ry - radius) / vy;
+        else if (vy < 0) return (-CollisionSystem.getAxisSize()  + radius - ry) / vy;
         else             return INFINITY;
     }
 
