@@ -14,7 +14,7 @@ import java.awt.Color;
 public class BHTree {
 
     // threshold value
-    private final double Theta = 0.3;
+    private final double Theta = 0.5;
 
     private Particle particle;     // body or aggregate body stored in this node
     private Quad quad;     // square region that the tree represents

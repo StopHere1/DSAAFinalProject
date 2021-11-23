@@ -104,7 +104,7 @@ public class Particle {
         double dx = b.rx - a.rx;
         double dy = b.ry - a.ry;
         double dist = Math.sqrt(dx*dx + dy*dy);
-        double F = (G * a.mass * b.mass) / (dist*dist ); //+ EPS*EPS
+        double F = (G * a.mass * b.mass) / (dist*dist); //+ EPS*EPS
         a.fx += F * dx / dist;
         a.fy += F * dy / dist;
 //        printf(String.valueOf(a.fx)+" ");

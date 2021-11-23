@@ -144,7 +144,7 @@ public class CollisionSystem {
 //                t = e.time; // set t as the time when the last event take place
 
                 double individualTime = t;
-                while(individualTime+dt<=e.time){
+                while(individualTime+dt<e.time){
                     Quad quad = new Quad(0, 0, axisSize * 2);
                     BHTree tree = new BHTree(quad);
 
@@ -160,14 +160,16 @@ public class CollisionSystem {
                         particles[i].update(dt);
                         predict(particles[i],dt);
                     }
+
                     StdDraw.clear();
                     for (int i = 0; i < particles.length; i++)
                         particles[i].draw();
 //                    StdDraw.show(10);
+
                     individualTime = individualTime + dt;
                 }
-
                 t=individualTime;
+
 
                 Quad quad = new Quad(0, 0, axisSize * 2);
                 BHTree tree = new BHTree(quad);
