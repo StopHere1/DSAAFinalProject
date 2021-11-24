@@ -180,6 +180,8 @@ public class Particle {
         if (this == that) return INFINITY;
         double dx  = that.rx - this.rx;
         double dy  = that.ry - this.ry;
+
+
         double dvx = that.vx - this.vx;
         double dvy = that.vy - this.vy;
         double dvdr = dx*dvx + dy*dvy;
@@ -191,6 +193,8 @@ public class Particle {
         double d = (dvdr*dvdr) - dvdv * (drdr - sigma*sigma);
         if (drdr < sigma*sigma) StdOut.println("overlapping particles");
         if (d < 0) return INFINITY;
+
+
         return -(dvdr + Math.sqrt(d)) / dvdv;
     }
 

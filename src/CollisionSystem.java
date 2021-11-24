@@ -144,6 +144,8 @@ public class CollisionSystem {
 //                t = e.time; // set t as the time when the last event take place
 
                 double individualTime = t;
+
+                //if e.time bigger than n*dt
                 while(individualTime+dt<e.time){
                     Quad quad = new Quad(0, 0, axisSize * 2);
                     BHTree tree = new BHTree(quad);
@@ -160,7 +162,10 @@ public class CollisionSystem {
                         particles[i].update(dt);
                         predict(particles[i],dt);
                     }
-
+                    if(count<=time.length-1 && individualTime==time[count]&&terminal){
+                            printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
+                            count++;
+                        }
                     StdDraw.clear();
                     for (int i = 0; i < particles.length; i++)
                         particles[i].draw();
@@ -170,7 +175,7 @@ public class CollisionSystem {
                 }
                 t=individualTime;
 
-
+                //for the remain time e.time-t (when smaller than dt)
                 Quad quad = new Quad(0, 0, axisSize * 2);
                 BHTree tree = new BHTree(quad);
 
@@ -186,7 +191,12 @@ public class CollisionSystem {
                     particles[i].update(e.time - t);
                     predict(particles[i],dt);
                 }
+                if(count<=time.length-1 && individualTime==time[count]&&terminal){
+                    printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
+                    count++;
+                }
                 StdDraw.clear();
+
                 for (int i = 0; i < particles.length; i++)
                     particles[i].draw();
 //                StdDraw.show(10);
@@ -289,16 +299,20 @@ public class CollisionSystem {
 
             // or read from standard input
             else {
+                // read if needed to print the data
                 String output = StdIn.readString();
                 if(output.equals("terminal")){
                     terminal=true;
                 }else{
                     terminal=false;
                 }
+                //set the axisSize
                 int n = StdIn.readInt();
                 axisSize = (double) n / 2;
                 StdDraw.setXscale(-axisSize,axisSize);
                 StdDraw.setYscale(-axisSize,axisSize);
+
+                //read in particles
                 n = StdIn.readInt();
                 particles = new Particle[n];
                 for (int i = 0; i < n; i++) {
@@ -314,6 +328,7 @@ public class CollisionSystem {
                     Color color   = new Color(r, g, b);
                     particles[i] = new Particle(rx, ry, vx, vy, radius, mass, color);
                 }
+                // read the time and particle needed to be print out
                 n = StdIn.readInt();
                 time = new int[n];
                 index= new int[n];
