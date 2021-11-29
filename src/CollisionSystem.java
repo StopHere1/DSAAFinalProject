@@ -40,23 +40,47 @@ public class CollisionSystem {
         }
 
         // updates priority queue with all new events for particle a
-        private void predict(Particle a, double limit) {
-            if (a == null) return;  //if particle is empty return
+        private void predict(Particle a) {
+            if (a == null) return;
 
             // particle-particle collisions
-            for (int i = 0; i < particles.length; i++) { //calculate the time to hit each particle
-                double dt = a.timeToHit(particles[i]);
-                if ( dt <= limit) // if the collision happens in the time-limit
-                    pq.insert(new Event(t + dt, a, particles[i]));   // add the collision to the event priority queue
+            for (int i = 0; i < particles.length; i++) {
+                double next_t = a.timeToHit(particles[i]);
+                if ( next_t <= dt)
+                    pq.insert(new Event(t + next_t, a, particles[i]));
             }
 
             // particle-wall collisions
             double dtX = a.timeToHitVerticalWall();
             double dtY = a.timeToHitHorizontalWall();
-            if (dtX <= limit) pq.insert(new Event(t + dtX, a, null));
-            if (dtY <= limit) pq.insert(new Event(t + dtY, null, a));
+            if ( dtX <= dt) pq.insert(new Event(t + dtX, a, null));
+            if ( dtY <= dt) pq.insert(new Event(t + dtY, null, a));
         }
+        //用于预判下一个dt时间内有无碰撞事件发生
+        private void  isCollision (Particle a ) {
+        for (int i = 0; i<particles.length; i++) {
+            double next_t = a.timeToHit(particles[i]);
+            if (next_t < dt) {
+                System.out.println("the current time is " +t +"s");
+                System.out.println("here comes a collision at " +(t+next_t));
+                pq.insert(new Event(t + next_t, a, particles[i]));
+                }
+            }
+        double dtX = a.timeToHitVerticalWall();
+        double dtY = a.timeToHitHorizontalWall();
 
+        if (dtX < dt) {
+            System.out.println("the current time is " +t);
+            System.out.println("here comes a collision at " +(t+dtX));
+            pq.insert(new Event(t + dtX, a, null));
+            }
+        if (dtY < dt) {
+            System.out.println("the current time is " +t);
+            System.out.println("here comes a collision at " +(t+dtY));
+
+            pq.insert(new Event(t + dtY, null, a));
+            }
+        }
         // redraw all particles
         private void redraw(double limit) {
             StdDraw.clear();      // clear the canvas
@@ -84,14 +108,12 @@ public class CollisionSystem {
 
 
         public void simulate(double limit) {
-
             // initialize PQ with collision events and redraw event
             pq = new MinPQ<Event>();
             for (int i = 0; i < particles.length; i++) {
-                predict(particles[i], dt);
+                predict(particles[i]);
             }
             pq.insert(new Event(0, null, null));        // redraw event
-
             int count= 0;
 
 //            Quad quad = new Quad(0, 0, axisSize * 2);
@@ -103,8 +125,9 @@ public class CollisionSystem {
 
             // the main event-driven simulation loop
             while (!pq.isEmpty()) {
-
                 // get impending event, discard if invalidated
+                // 将预判行为放到开始而不是结尾，避免空指针
+
                 Event e = pq.delMin();
                 if (!e.isValid()) continue;
                 Particle a = e.a;
@@ -156,12 +179,14 @@ public class CollisionSystem {
                             tree.insert(particles[i]);
 
                     // update the forces, positions, velocities, and accelerations
+                    // 将所有粒子在下一个dt可能发生的碰撞存到pq里面，可优化
                     for (int i = 0; i < particles.length; i++) {
                         particles[i].resetForce();
                         tree.updateForce(particles[i]);
                         particles[i].update(dt);
-                        predict(particles[i],dt);
+                        predict(particles[i]);
                     }
+
                     if(count<=time.length-1 && individualTime==time[count]&&terminal){
                             printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
                             count++;
@@ -189,7 +214,7 @@ public class CollisionSystem {
                     particles[i].resetForce();
                     tree.updateForce(particles[i]);
                     particles[i].update(e.time - t);
-                    predict(particles[i],dt);
+                    predict(particles[i]);
                 }
                 if(count<=time.length-1 && individualTime==time[count]&&terminal){
                     printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
@@ -209,10 +234,11 @@ public class CollisionSystem {
                 else if (a == null && b == null) {
                     redraw(limit);               // redraw event
                 }
-
-                // update the priority queue with new collisions involving a or b
-                predict(a, dt);
-                predict(b, dt);
+                // 对每一个粒子预测，而是不是A,B，避免空指针
+                for (Particle particle: particles) {
+                    isCollision(particle);// 两球碰撞时pq会存两个相同的事件，可优化
+//                    predict(particle);   //明明是几乎一摸一样的代码，这一句运行久了就会加速然后崩溃
+                }
             }
         }
 
