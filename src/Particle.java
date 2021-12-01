@@ -38,6 +38,7 @@ public class Particle {
     private double rx, ry;        // position
     private double vx, vy;        // velocity
     private double fx, fy;       // force
+    private double vxbefore,vybefore,rxbefore,rybefore;
     private int count;            // number of collisions so far
     private final double radius;  // radius
     private final double mass;    // mass
@@ -71,9 +72,27 @@ public class Particle {
         vx += dt * fx / mass;
 //        printf(String.valueOf(vx)+"after");
         vy += dt * fy / mass;
+
         rx += dt * vx;
         ry += dt * vy;
 //        printf("updated");
+    }
+
+    public void updateVelocity(double dt) {
+
+        vxbefore=vx;
+
+        vx += dt * fx / mass;
+
+        vybefore=vy;
+
+        vy += dt * fy / mass;
+
+    }
+    public void resetvelocity(){
+        vx=vxbefore;
+        vy=vybefore;
+
     }
 
     /**

@@ -10,13 +10,12 @@ import edu.princeton.cs.algs4.StdIn;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import static edu.princeton.cs.algs4.StdOut.printf;
-import static edu.princeton.cs.algs4.StdOut.println;
+import static edu.princeton.cs.algs4.StdOut.*;
 
 
 public class CollisionSystem {
-        private static final double HZ = 10;    // number of redraw events per clock tick
-        private static final double dt = 1/HZ;
+        private static final double HZ = 1;    // number of redraw events per clock tick
+        private static final double dt = 1.0/HZ;
         private MinPQ<Event> pq;          // the priority queue
         private double t  = 0.0;          // simulation clock time
         private Particle[] particles;     // the array of particles
@@ -45,9 +44,9 @@ public class CollisionSystem {
 
             // particle-particle collisions
             for (int i = 0; i < particles.length; i++) { //calculate the time to hit each particle
-                double dt = a.timeToHit(particles[i]);
-                if ( dt <= limit) // if the collision happens in the time-limit
-                    pq.insert(new Event(t + dt, a, particles[i]));   // add the collision to the event priority queue
+                double deltat = a.timeToHit(particles[i]);
+                if ( deltat <= limit) // if the collision happens in the time-limit
+                    pq.insert(new Event(t + deltat, a, particles[i]));   // add the collision to the event priority queue
             }
 
             // particle-wall collisions
@@ -68,10 +67,10 @@ public class CollisionSystem {
 
             }
             StdDraw.show();
-            StdDraw.pause(20);
+            StdDraw.pause(10);
             if (t < limit) {
 
-                pq.insert(new Event(t + 1.0 / HZ, null, null));  //redraw event
+//                pq.insert(new Event(t + dt, null, null));  //redraw event
             }
         }
 
@@ -143,64 +142,127 @@ public class CollisionSystem {
 //                }    //enable particles to move to the next time when collision take place.
 //                t = e.time; // set t as the time when the last event take place
 
-                double individualTime = t;
-
+                
+//                println(t);
+                Quad quad = new Quad(0, 0, axisSize * 2);
                 //if e.time bigger than n*dt
-                while(individualTime+dt<e.time){
-                    Quad quad = new Quad(0, 0, axisSize * 2);
-                    BHTree tree = new BHTree(quad);
+                while(t + dt<e.time){
 
+                    BHTree tree = new BHTree(quad);
+                    println(e.a);
+                    println(dt);
                     // build the Barnes-Hut tree
-                    for (int i = 0; i < particles.length; i++)
-                        if (particles[i].in(quad))
-                            tree.insert(particles[i]);
+                    for (Particle particle1 : particles)
+                        if (particle1.in(quad))
+                            tree.insert(particle1);
 
                     // update the forces, positions, velocities, and accelerations
-                    for (int i = 0; i < particles.length; i++) {
-                        particles[i].resetForce();
-                        tree.updateForce(particles[i]);
-                        particles[i].update(dt);
-                        predict(particles[i],dt);
+                    for (Particle element : particles) {
+                        element.resetForce();
+                        tree.updateForce(element);
+                        element.update(dt);
+//                        predict(particles[i],dt);
                     }
-                    if(count<=time.length-1 && individualTime==time[count]&&terminal){
+                    if(count<=time.length-1 && t==time[count]&&terminal){
                             printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
                             count++;
                         }
+
                     StdDraw.clear();
-                    for (int i = 0; i < particles.length; i++)
-                        particles[i].draw();
+                    for (Particle item : particles) item.draw();
 //                    StdDraw.show(10);
 
-                    individualTime = individualTime + dt;
+                    t = t + dt;
+
+//                    Quad quad = new Quad(0, 0, axisSize * 2);
+                    tree = new BHTree(quad);
+
+//                    println("123456");
+                    // build the Barnes-Hut tree
+                    for (Particle value : particles)
+                        if (value.in(quad))
+                            tree.insert(value);
+
+
+                    for (Particle value : particles) {
+                        value.resetForce();
+                        tree.updateForce(value);
+                        value.updateVelocity(dt);
+                    }
+
+                    for (Particle particle : particles) {
+                        predict(particle, dt);
+                    }
+
+                    for (Particle particle : particles) {
+                        particle.resetvelocity();
+
+                    }
+
+
                 }
-                t=individualTime;
+
+
 
                 //for the remain time e.time-t (when smaller than dt)
-                Quad quad = new Quad(0, 0, axisSize * 2);
+
                 BHTree tree = new BHTree(quad);
 
                 // build the Barnes-Hut tree
-                for (int i = 0; i < particles.length; i++)
-                    if (particles[i].in(quad))
-                        tree.insert(particles[i]);
+                for (Particle particle : particles)
+                    if (particle.in(quad))
+                        tree.insert(particle);
 
                 // update the forces, positions, velocities, and accelerations
-                for (int i = 0; i < particles.length; i++) {
-                    particles[i].resetForce();
-                    tree.updateForce(particles[i]);
-                    particles[i].update(e.time - t);
-                    predict(particles[i],dt);
+                for (Particle particle : particles) {
+                    particle.resetForce();
+                    tree.updateForce(particle);
+                    particle.update(e.time - t);
+//                    predict(particles[i],dt);
                 }
-                if(count<=time.length-1 && individualTime==time[count]&&terminal){
+
+                tree = new BHTree(quad);
+
+//                    println("123456");
+                // build the Barnes-Hut tree
+                for (Particle particle : particles)
+                    if (particle.in(quad))
+                        tree.insert(particle);
+
+                // update the forces, positions, velocities, and accelerations
+                for (Particle particle : particles) {
+                    particle.resetForce();
+                    tree.updateForce(particle);
+                    particle.updateVelocity(dt);
+//                        predict(particles[i],dt);
+                }
+
+                for (Particle particle : particles) {
+                    predict(particle, dt);
+
+                }
+
+                for (Particle particle : particles) {
+                    particle.resetvelocity();
+
+                }
+
+//                for (int i = 0; i < particles.length; i++) {
+////                    particles[i].resetForce();
+////                    tree.updateForce(particles[i]);
+//                    particles[i].update(e.time - t);
+//                    predict(particles[i],dt);
+//                }
+                if(count<time.length && t==time[count]&&terminal){
                     printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
                     count++;
                 }
                 StdDraw.clear();
 
-                for (int i = 0; i < particles.length; i++)
-                    particles[i].draw();
+                for (Particle particle : particles) particle.draw();
 //                StdDraw.show(10);
-                t=e.time;
+
+                t = e.time;
 
                 // process event
                 if      (a != null && b != null) a.bounceOff(b);              // particle-particle collision
@@ -210,9 +272,36 @@ public class CollisionSystem {
                     redraw(limit);               // redraw event
                 }
 
+                pq.insert(new Event(t+dt,null,null));
+//                double totalKineticEnergy =0;
+//                for(Particle value:particles){
+//                    totalKineticEnergy+=value.kineticEnergy();
+//                }
+//                println(totalKineticEnergy);
                 // update the priority queue with new collisions involving a or b
-                predict(a, dt);
-                predict(b, dt);
+                tree = new BHTree(quad);
+
+//                    println("123456");
+                // build the Barnes-Hut tree
+                for (Particle particle : particles)
+                    if (particle.in(quad))
+                        tree.insert(particle);
+
+                // update the forces, positions, velocities, and accelerations
+                for (Particle particle : particles) {
+                    particle.resetForce();
+                    tree.updateForce(particle);
+                    particle.updateVelocity(dt);
+//                        predict(particles[i],dt);
+                }
+
+                predict(a,dt);
+                predict(b,dt);
+
+                for (Particle particle : particles) {
+                    particle.resetvelocity();
+
+                }
             }
         }
 
