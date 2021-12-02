@@ -68,13 +68,16 @@ public class Particle {
     }
 
     public void update(double dt) {
-//        printf(String.valueOf(vx)+"before");
+
+        rx += dt * vx;
+        ry += dt * vy;
+
+        //        printf(String.valueOf(vx)+"before");
         vx += dt * fx / mass;
 //        printf(String.valueOf(vx)+"after");
         vy += dt * fy / mass;
 
-        rx += dt * vx;
-        ry += dt * vy;
+
 //        printf("updated");
     }
 
