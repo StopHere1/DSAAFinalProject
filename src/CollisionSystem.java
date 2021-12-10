@@ -100,7 +100,7 @@ public class CollisionSystem {
 
 
         public void simulate(double limit) {
-
+            int n = 0;
             // initialize PQ with collision events and redraw event
             pq = new MinPQ<Event>();
 
@@ -151,10 +151,10 @@ public class CollisionSystem {
 
 
 
-                if(count<time.length && t==time[count]&&terminal){
-                    printf("%e %e %e %e\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
-                    count++;
-                }
+//                if(count<time.length && t-time[count] < dt  &&terminal){
+//                    printf("%e %e %19f %19f\n",particles[index[count]].getRx(),particles[index[count]].getRy(),particles[index[count]].getVx(),particles[index[count]].getVy());
+//                    count++;
+//                }
 
 
 
@@ -168,6 +168,15 @@ public class CollisionSystem {
                     redraw(limit);               // redraw event
                 }
 
+
+                if (n < time.length && time[n] < t) {
+                    double x = particles[index[n]].getRx() + axisSize;
+                    double y = particles[index[n]].getRy() + axisSize;
+                    double vx = particles[index[n]].getVx();
+                    double vy = particles[index[n]].getVy();
+                    n++;
+                    printf("%f %f %f %f\n", x, y, vx, vy);
+                }
 
             }
         }
