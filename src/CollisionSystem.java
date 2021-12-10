@@ -21,7 +21,7 @@ public class CollisionSystem {
         private Particle[] particles;     // the array of particles
         private static double axisSize = 1 ;
         private static boolean terminal = true;
-        private static int[] time =null;
+        private static double[] time =null;
         private static int[] index =null;
 
 
@@ -119,7 +119,7 @@ public class CollisionSystem {
 
                 println("current event = "+eventCount++);
                 println("pq size  = "+pq.size());
-                    predict( dt);
+                predict( dt);
                 println("pq size after predict = "+pq.size());
 
                 // get impending event, discard if invalidated
@@ -288,10 +288,10 @@ public class CollisionSystem {
 
                 // read the time and particle needed to be print out
                 n = StdIn.readInt();
-                time = new int[n];
+                time = new double[n];
                 index= new int[n];
                 for(int i = 0; i < n ;i++){
-                    int ti = StdIn.readInt();
+                    double ti = StdIn.readDouble();
                     int in= StdIn.readInt();
                     time[i]= ti;
                     index[i]=in;
