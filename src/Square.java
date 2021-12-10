@@ -1,10 +1,12 @@
 public class Square {
-
+    //center of the Square
     private final double xmid;
     private final double ymid;
+
+    //length of the Square
     private final double length;
 
-    public Square(double xmid, double ymid, double length) {
+    public Square(double xmid, double ymid, double length) { //initialize
         this.xmid = xmid;
         this.ymid = ymid;
         this.length = length;
@@ -38,7 +40,7 @@ public class Square {
         return SE;
     }
 
-    public boolean contains(Rect rect) {
+    public boolean contains(Rect rect) {  //check if the rect of the particle is in the square totally
         double halfLen = this.length / 2.0;
         return (rect.getX() + rect.getWidth() <= this.xmid + halfLen &&
                 rect.getX() >= this.xmid - halfLen &&

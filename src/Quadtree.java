@@ -16,7 +16,7 @@ public class Quadtree {
 
 
 
-    public Quadtree(Square square,Quadtree fatherNode) {
+    public Quadtree(Square square,Quadtree fatherNode) {  //initialize with square and fatherNode
          this.square=square;
          this.particle=null;
          this.father=fatherNode;
@@ -29,7 +29,7 @@ public class Quadtree {
     }
     public void insert(Particle b,double dt) {
 
-        // if this node does not contain a body, put the new body b here
+        //while the particle could still be inserted into the square
         while(square.contains(b.getRect())) {
             // internal node
             if (!isExternal()) {
@@ -55,6 +55,9 @@ public class Quadtree {
 
             }
         }
+        //insert the particle to the father node of the current node
+
+
     }
 //@Override
 //private Rectangle rectangle(double x,double y,double deltax,double deltay){
