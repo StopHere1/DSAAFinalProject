@@ -43,6 +43,7 @@ public class Particle {
     private final double radius;  // radius
     private final double mass;    // mass
     private final Color color;    // color
+    private Rect rect;
     private static final double G = 6.67e-11;
 
     /**
@@ -92,10 +93,17 @@ public class Particle {
         vy += dt * fy / mass;
 
     }
-    public void resetvelocity(){
+    public void resetVelocity(){
         vx=vxbefore;
         vy=vybefore;
 
+    }
+    public void updateRect(double dt){
+        rect=new Rect(this,dt);
+    }
+
+    public Rect getRect() {
+        return rect;
     }
 
     /**
@@ -139,6 +147,10 @@ public class Particle {
 
     public boolean in(Quad q) {
         return q.contains(this.rx, this.ry);
+    }
+
+    public boolean inSquare(Square q) {
+        return q.contains(this.getRect());
     }
 
     public Particle plus(Particle b) {
@@ -202,8 +214,6 @@ public class Particle {
         if (this == that) return INFINITY;
         double dx  = that.rx - this.rx;
         double dy  = that.ry - this.ry;
-
-
         double dvx = that.vx - this.vx;
         double dvy = that.vy - this.vy;
         double dvdr = dx*dvx + dy*dvy;
@@ -302,6 +312,24 @@ public class Particle {
         vy = -vy;
         count++;
     }
+
+//    public void updateRectangle(double dt){   //update rectangle according to vx vy of the particle
+//        double absDeltaX= dt*Math.abs(this.vx);
+//        double absDeltaY= dt*Math.abs(this,vy);
+//
+//        if(this.vx>0&&this.vy>0){
+//            this.movingRectangle=new Rectangle(this.rx-this.radius,this.vy+absDeltaY+this.radius,absDeltaX+2*this.radius,absDeltaY+2*this.radius);
+//        }
+//        else if(this.vx>0&&this.vy<0){
+//            this.movingRectangle=new Rectangle();
+//        }
+//        else if(this.vx<0&&this.vy>0){
+//            this.movingRectangle=new Rectangle();
+//        }
+//        else if(this.vx<0&&this.vy<0){
+//            this.movingRectangle=new Rectangle();
+//        }
+//    }
 
     public double getRx() {
         return rx;

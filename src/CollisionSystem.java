@@ -7,7 +7,7 @@ import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdIn;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.ArrayList;
 
 import static edu.princeton.cs.algs4.StdOut.*;
@@ -55,12 +55,12 @@ public class CollisionSystem {
                 double dtX = particle1.timeToHitVerticalWall();
                 double dtY = particle1.timeToHitHorizontalWall();
                 if (dtX <= limit&&dtX+t<=minimumTimeEvent.time) {
-//                    println("update Xwallcollision");
+//                    println("update xWallCollision");
                     minimumTimeEvent = new Event(t + dtX, particle1, null);
                 }
 
                 if (dtY <= limit&&dtY+t<=minimumTimeEvent.time) {
-//                    println("update Ywallcollision");
+//                    println("update yWallCollision");
                     minimumTimeEvent = new Event(t + dtY, null, particle1);
 
                 }
@@ -111,6 +111,8 @@ public class CollisionSystem {
             int count= 0;
             int eventCount = 1;
 
+            //initialize quad tree
+//            Quadtree quadtree = new Quadtree(0, new Rectangle(0,0,600,600));
 
             // the main event-driven simulation loop
             while (!pq.isEmpty()) {
