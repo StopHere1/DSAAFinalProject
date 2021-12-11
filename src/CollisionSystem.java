@@ -6,9 +6,6 @@
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdIn;
-import edu.princeton.cs.algs4.StdOut;
-
-import java.util.Date;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -17,7 +14,7 @@ import static edu.princeton.cs.algs4.StdOut.*;
 
 
 public class CollisionSystem {
-        private static final double HZ = 10000;    // number of redraw events per clock tick
+        private static final double HZ = 100;    // number of redraw events per clock tick
         private static final double dt = 1.0/HZ;
         private MinPQ<Event> pq;          // the priority queue
         private double t  = 0.0;          // simulation clock time
@@ -26,7 +23,6 @@ public class CollisionSystem {
         private static boolean terminal = true;
         private static double[] time =null;
         private static int[] index =null;
-        private double last;// the array of particles
 
 
 
@@ -43,46 +39,42 @@ public class CollisionSystem {
         }
 
         // updates priority queue with all new events for particle a
-        private void predict(double limit) {
-
-            Rectangle bound = new Rectangle(0, 0, 2 * axisSize, 2 * axisSize);
-            Quadtree quadtree = new Quadtree(0, bound);
-            int i = 0;
-            for (Particle particle : particles) {
-                quadtree.particleinsert(particle, dt, i, axisSize);
-                i++;
-            }
-
+        private void predict( double limit) {
 //            if (a == null) return;  //if particle is empty return
-            Event minimumTimeEvent = new Event(t + limit, null, null);
+            Event minimumTimeEvent = new Event(t+limit,null,null);
             // particle-particle collisions
-            for (Particle particle1 : particles) {
-                ArrayList<Integer> range=quadtree.retrieve(particle1,dt,axisSize);
-                for (int w:range) { //calculate the time to hit each particle
-                    double T = particle1.timeToHit(particles[w]);
-                    if (T <= limit && t + T < minimumTimeEvent.time) {
+            for(Particle particle1 : particles) {
+                for (Particle particle : particles) { //calculate the time to hit each particle
+                    double T = particle1.timeToHit(particle);
+                    if (T <= limit && t+T<minimumTimeEvent.time) {
 //                        println("update collision");
-                        minimumTimeEvent = new Event(t + T, particle1, particles[w]);
+                         minimumTimeEvent = new Event(t+T,particle1,particle);
                     }// if the collision happens in the time-limit
+                          // add the collision to the event priority queue
                 }
                 double dtX = particle1.timeToHitVerticalWall();
                 double dtY = particle1.timeToHitHorizontalWall();
-                if (dtX <= limit && dtX + t <= minimumTimeEvent.time) {
+                if (dtX <= limit&&dtX+t<=minimumTimeEvent.time) {
+//                    println("update xWallCollision");
                     minimumTimeEvent = new Event(t + dtX, particle1, null);
                 }
 
-                if (dtY <= limit && dtY + t <= minimumTimeEvent.time) {
+                if (dtY <= limit&&dtY+t<=minimumTimeEvent.time) {
+//                    println("update yWallCollision");
                     minimumTimeEvent = new Event(t + dtY, null, particle1);
 
                 }
             }
 
             // particle-wall collisions
-            if (minimumTimeEvent.a != null || minimumTimeEvent.b != null) {
+            if(minimumTimeEvent.a!=null || minimumTimeEvent.b!=null){
+//                println("insert event");
                 pq.insert(minimumTimeEvent);
-            }
-        }
 
+            }
+
+
+        }
 
 
         // redraw all particles
@@ -119,12 +111,16 @@ public class CollisionSystem {
             int count= 0;
             int eventCount = 1;
 
+            //initialize quad tree
+//            Quadtree quadtree = new Quadtree(0, new Rectangle(0,0,600,600));
+
             // the main event-driven simulation loop
             while (!pq.isEmpty()) {
-//                println("current event = "+eventCount++);
-//                println("pq size  = "+pq.size());
+
+                println("current event = "+eventCount++);
+                println("pq size  = "+pq.size());
                 predict( dt);
-//                println("pq size after predict = "+pq.size());
+                println("pq size after predict = "+pq.size());
 
                 // get impending event, discard if invalidated
                 Event e = pq.delMin();
@@ -160,8 +156,9 @@ public class CollisionSystem {
 //                    count++;
 //                }
 
-                t = e.time;
 
+
+                t = e.time;
 
                 // process event
                 if      (a != null && b != null) a.bounceOff(b);              // particle-particle collision
@@ -183,74 +180,6 @@ public class CollisionSystem {
 
             }
         }
-
-    public void simulate2(double limit) {
-        int n = 0;
-        // initialize PQ with collision events and redraw event
-        pq = new MinPQ<Event>();
-
-        predict(dt);
-
-        pq.insert(new Event(0, null, null));        // redraw event
-
-        int count = 0;
-        int eventCount = 1;
-        last = 0;
-
-
-        // the main event-driven simulation loop
-        while (!pq.isEmpty()) {
-
-
-            predict(dt);
-
-
-            // get impending event, discard if invalidated
-            Event e = pq.delMin();
-            if (e.a == null && e.b == null && pq.size() != 0) {
-                pq.delMin();
-            }
-            if (!e.isValid()) continue;
-
-            Particle a = e.a;
-            Particle b = e.b;
-
-
-            Quad quad = new Quad(0, 0, axisSize * 2);
-
-            BHTree tree = new BHTree(quad);
-
-            // build the Barnes-Hut tree
-            for (Particle particle : particles)
-                if (particle.in(quad))
-                    tree.insert(particle);
-
-            // update the forces, positions, velocities, and accelerations
-            for (Particle particle : particles) {
-                particle.resetForce();
-                tree.updateForce(particle);
-                particle.update(e.time - t);
-            }
-
-            t = e.time;
-            // process event
-            if (a != null && b != null) {
-                a.bounceOff(b);
-            }             // particle-particle collision
-            else if (a != null && b == null) {
-                a.bounceOffVerticalWall();
-            }   // particle-wall collision
-            else if (a == null && b != null) {
-                b.bounceOffHorizontalWall();
-            } // particle-wall collision
-            else if (a == null && b == null) {
-                if (t < limit) {
-                    pq.insert(new Event(t + dt, null, null));  //redraw event
-                }
-            }
-            redraw(limit);
-        }
-    }
 
 
         /***************************************************************************
@@ -310,9 +239,17 @@ public class CollisionSystem {
 
         public static void main(String[] args) {
 
+            StdDraw.setCanvasSize(600, 600);
+
+            //test axis
+//            StdDraw.setPenColor(StdDraw.RED);
+//            StdDraw.setPenRadius(0.1);
+//            StdDraw.point(0.5,0.5);
+
+
 
             // enable double buffering
-
+            StdDraw.enableDoubleBuffering();
 
             // the array of particles
             Particle[] particles;
@@ -329,91 +266,51 @@ public class CollisionSystem {
             else {
                 // read if needed to print the data
                 String output = StdIn.readString();
-                if (output.equals("terminal")) {
-                    terminal = true;
-                    //set the axisSize
-                    int n = StdIn.readInt();
-                    axisSize = (double) n / 2;
-
-
-                    //read in particles
-                    n = StdIn.readInt();
-                    particles = new Particle[n];
-                    for (int i = 0; i < n; i++) {
-                        double rx = StdIn.readDouble() - axisSize;
-                        double ry = StdIn.readDouble() - axisSize;
-                        double vx = StdIn.readDouble();
-                        double vy = StdIn.readDouble();
-                        double radius = StdIn.readDouble();
-                        double mass = StdIn.readDouble();
-                        int r = StdIn.readInt();
-                        int g = StdIn.readInt();
-                        int b = StdIn.readInt();
-                        Color color = new Color(r, g, b);
-                        particles[i] = new Particle(rx, ry, vx, vy, radius, mass, color);
-                    }
-
-                    // read the time and particle needed to be print out
-                    n = StdIn.readInt();
-                    time = new double[n];
-                    index = new int[n];
-                    for (int i = 0; i < n; i++) {
-                        double ti = StdIn.readDouble();
-                        int in = StdIn.readInt();
-                        time[i] = ti;
-                        index[i] = in;
-                    }
-
-
-                    // create collision system and simulate
-                    CollisionSystem system = new CollisionSystem(particles);
-                    Date start = new Date();
-                    system.simulate(5);
-                    Date end = new Date();
-                    StdOut.println("the spent time is : " + (end.getTime() - start.getTime()) );
-
-                } else if (output.equals("gui")) {
-                    StdDraw.enableDoubleBuffering();
-                    StdDraw.setCanvasSize(600, 600);
-                    terminal = false;
-                    int n = StdIn.readInt();
-                    axisSize = (double) n / 2;
-                    StdDraw.setXscale(-axisSize, axisSize);
-                    StdDraw.setYscale(-axisSize, axisSize);
-
-                    //read in particles
-                    n = StdIn.readInt();
-                    particles = new Particle[n];
-                    for (int i = 0; i < n; i++) {
-                        double rx = StdIn.readDouble() - axisSize;
-                        double ry = StdIn.readDouble() - axisSize;
-                        double vx = StdIn.readDouble();
-                        double vy = StdIn.readDouble();
-                        double radius = StdIn.readDouble();
-                        double mass = StdIn.readDouble();
-                        int r = StdIn.readInt();
-                        int g = StdIn.readInt();
-                        int b = StdIn.readInt();
-                        Color color = new Color(r, g, b);
-                        particles[i] = new Particle(rx, ry, vx, vy, radius, mass, color);
-                    }
-
-                    // read the time and particle needed to be print out
-                    n = StdIn.readInt();
-                    time = new double[n];
-                    index = new int[n];
-                    for (int i = 0; i < n; i++) {
-                        double ti = StdIn.readDouble();
-                        int in = StdIn.readInt();
-                        time[i] = ti;
-                        index[i] = in;
-                    }
-
-                    // create collision system and simulate
-                    CollisionSystem system = new CollisionSystem(particles);
-                    system.simulate2(10000);
+                if(output.equals("terminal")){
+                    terminal=true;
+                }else{
+                    terminal=false;
                 }
+
+                //set the axisSize
+                int n = StdIn.readInt();
+                axisSize = (double) n / 2;
+                StdDraw.setXscale(-axisSize,axisSize);
+                StdDraw.setYscale(-axisSize,axisSize);
+
+                //read in particles
+                n = StdIn.readInt();
+                particles = new Particle[n];
+                for (int i = 0; i < n; i++) {
+                    double rx     = StdIn.readDouble() - axisSize;
+                    double ry     = StdIn.readDouble() - axisSize;
+                    double vx     = StdIn.readDouble() ;
+                    double vy     = StdIn.readDouble() ;
+                    double radius = StdIn.readDouble();
+                    double mass   = StdIn.readDouble();
+                    int r         = StdIn.readInt();
+                    int g         = StdIn.readInt();
+                    int b         = StdIn.readInt();
+                    Color color   = new Color(r, g, b);
+                    particles[i] = new Particle(rx, ry, vx, vy, radius, mass, color);
+                }
+
+                // read the time and particle needed to be print out
+                n = StdIn.readInt();
+                time = new double[n];
+                index= new int[n];
+                for(int i = 0; i < n ;i++){
+                    double ti = StdIn.readDouble();
+                    int in= StdIn.readInt();
+                    time[i]= ti;
+                    index[i]=in;
+                }
+
             }
+
+            // create collision system and simulate
+            CollisionSystem system = new CollisionSystem(particles);
+            system.simulate(10000);
         }
 
     public static double getAxisSize() {
