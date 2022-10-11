@@ -1,3 +1,5 @@
-# DSAAFinalProject
-Code for DSAA b Final Project
-// test if the accese right is completed
+# DSAA FinalProject
+Code for DSAA Final Project
+Project: Balls movement simulation under universal gravity and elastic collision condition.
+using BH-trees for simplified algorism , improving the overall performance.
+
